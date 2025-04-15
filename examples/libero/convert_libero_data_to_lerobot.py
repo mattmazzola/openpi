@@ -25,7 +25,7 @@ from lerobot.common.datasets.lerobot_dataset import LeRobotDataset
 import tensorflow_datasets as tfds
 import tyro
 
-REPO_NAME = "your_hf_username/libero"  # Name of the output dataset, also used for the Hugging Face Hub
+REPO_NAME = "mattmazzola/libero"  # Name of the output dataset, also used for the Hugging Face Hub
 RAW_DATASET_NAMES = [
     "libero_10_no_noops",
     "libero_goal_no_noops",
@@ -79,15 +79,16 @@ def main(data_dir: str, *, push_to_hub: bool = False):
         raw_dataset = tfds.load(raw_dataset_name, data_dir=data_dir, split="train")
         for episode in raw_dataset:
             for step in episode["steps"].as_numpy_iterator():
-                dataset.add_frame(
-                    {
-                        "image": step["observation"]["image"],
-                        "wrist_image": step["observation"]["wrist_image"],
-                        "state": step["observation"]["state"],
-                        "actions": step["action"],
-                    }
-                )
-            dataset.save_episode(task=step["language_instruction"].decode())
+                frame = {
+                    "image": step["observation"]["image"],
+                    "wrist_image": step["observation"]["wrist_image"],
+                    "state": step["observation"]["state"],
+                    "actions": step["action"],
+                }
+                task = step["language_instruction"].decode()
+
+                dataset.add_frame(frame)
+            dataset.save_episode(task=task)
 
     # Consolidate the dataset, skip computing stats since we will do that later
     dataset.consolidate(run_compute_stats=False)
