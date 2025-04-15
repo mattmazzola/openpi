@@ -1,0 +1,32 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Convert Libero to LeRobot",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "scripts.convert_libero_data_to_lerobot",
+            "justMyCode": false,
+            "args": [
+                "--data-dir",
+                "~/modified_libero_rlds/"
+            ]
+        },
+        {
+            "name": "Convert ERLDS to LeRobot",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "scripts.convert_erlds_data_to_lerobot",
+            "justMyCode": false,
+            "args": [
+                "--data-dir",
+                "~/echelondata/benchmark_01/atupini",
+                "--dataset-name",
+                "benchamrk_01_post_quaternion_fix__20250404_original",
+            ]
+        }
+    ]
+}
