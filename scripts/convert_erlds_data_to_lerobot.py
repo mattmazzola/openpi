@@ -70,12 +70,8 @@ def get_state_action(step: dict[str, Any]) -> dict[str, Any]:
 
 
 def compute_rotation_delta(current, target):
-    assert (
-        current.shape[-1] == 4
-    ), f"Expected quaternions with 4 values, got shape {current.shape}"
-    assert (
-        target.shape[-1] == 4
-    ), f"Expected quaternions with 4 values, got shape {target.shape}"
+    assert current.shape[-1] == 4, f"Expected quaternions with 4 values, got shape {current.shape}"
+    assert target.shape[-1] == 4, f"Expected quaternions with 4 values, got shape {target.shape}"
 
     # Create Rotation objects for current and target quaternions
     current_r = Rotation.from_quat(current.numpy())
@@ -95,7 +91,7 @@ def main(
     dataset_name: str,
     *,
     push_to_hub: bool = False,
-    repo_name: str = "mattmazzola/erlds",
+    repo_name: str = "mattmazzola/echelon",
 ):
     # Clean up any existing dataset in the output directory
     output_path = LEROBOT_HOME / repo_name
@@ -120,10 +116,10 @@ def main(
                 "shape": (8,),
                 "names": ["state"],
             },
-            "actions": {
+            "action": {
                 "dtype": "float32",
                 "shape": (7,),
-                "names": ["actions"],
+                "names": ["action"],
             },
         },
         image_writer_threads=10,
@@ -138,7 +134,7 @@ def main(
             frame = {
                 "image": image,
                 "state": state,
-                "actions": action,
+                "action": action,
             }
             task = step["natural_language_instruction"].decode()
 
@@ -153,7 +149,7 @@ def main(
         lerobot_dataset.push_to_hub(
             tags=["ur3e", "rlds"],
             private=False,
-            push_videos=True,
+            push_videos=False,
             license="apache-2.0",
         )
 

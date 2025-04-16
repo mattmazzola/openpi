@@ -26,7 +26,24 @@
                 "~/echelondata/benchmark_01/atupini",
                 "--dataset-name",
                 "benchamrk_01_post_quaternion_fix__20250404_original",
+                // "--push-to-hub",
             ]
-        }
+        },
+        {
+            "name": "Compute Norm Stats",
+            "type": "debugpy",
+            "request": "launch",
+            "justMyCode": false,
+            "program": "${workspaceFolder}/scripts/compute_norm_stats.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "args": [
+                "--config-name",
+                "pi0_echelon_sim"
+            ],
+            "python": "${workspaceFolder}/.venv/bin/python"
+        },
     ]
 }
