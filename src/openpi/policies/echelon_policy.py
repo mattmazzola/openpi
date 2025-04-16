@@ -47,8 +47,18 @@ class EchelonInputs(transforms.DataTransformFn):
         if set(in_images) - set(self.EXPECTED_CAMERAS):
             raise ValueError(f"Expected images to contain {self.EXPECTED_CAMERAS}, got {tuple(in_images)}")
 
+        def convert_image(img):
+            img = np.asarray(img)
+            # Convert to uint8 if using float images.
+            if np.issubdtype(img.dtype, np.floating):
+                img = (255 * img).astype(np.uint8)
+            # Convert from [channel, height, width] to [height, width, channel].
+            return einops.rearrange(img, "c h w -> h w c")
+
+        images_dict = {cam_name: convert_image(img) for cam_name, img in data["images"].items()}
+
         # Assume that base image always exists.
-        base_image = in_images["cam_low"]
+        base_image = images_dict["cam_low"]
 
         images = {
             "base_0_rgb": base_image,
@@ -56,6 +66,19 @@ class EchelonInputs(transforms.DataTransformFn):
         image_masks = {
             "base_0_rgb": np.True_,
         }
+
+        # Add the extra images.
+        extra_image_names = {
+            "left_wrist_0_rgb": "cam_left_wrist",
+            "right_wrist_0_rgb": "cam_right_wrist",
+        }
+        for dest, source in extra_image_names.items():
+            if source in in_images:
+                images[dest] = in_images[source]
+                image_masks[dest] = np.True_
+            else:
+                images[dest] = np.zeros_like(base_image)
+                image_masks[dest] = np.False_
 
         inputs = {
             "image": images,
@@ -78,7 +101,10 @@ class EchelonInputs(transforms.DataTransformFn):
 class EchelonOutputs(transforms.DataTransformFn):
     """Outputs for the Echelon policy."""
 
+    action_dim: int
+
     def __call__(self, data: dict) -> dict:
+        # TODO: Use action_dim here also instead of hardcoding
         # Only return the first 7 dims.
         action = np.asarray(data["action"][:7])
         return {"action": action}

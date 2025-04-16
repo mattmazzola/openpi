@@ -226,7 +226,11 @@ class LeRobotEchelonDataConfig(DataConfigFactory):
                     action_dim=model_config.action_dim,
                 )
             ],
-            outputs=[echelon_policy.EchelonOutputs()],
+            outputs=[
+                echelon_policy.EchelonOutputs(
+                    action_dim=model_config.action_dim,
+                )
+            ],
         )
 
         model_transforms = ModelTransformFactory()(model_config)
