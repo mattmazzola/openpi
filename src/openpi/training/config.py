@@ -203,8 +203,29 @@ class LeRobotEchelonDataConfig(DataConfigFactory):
 
     @override
     def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
+        repack_transform = _transforms.Group(
+            inputs=[
+                _transforms.RepackTransform(
+                    {
+                        "state": "state",
+                        # Actions key is required for computing norm stats
+                        "actions": "action",
+                        "images": {
+                            "cam_low": "image",
+                        },
+                        "prompt": "prompt",
+                    }
+                )
+            ]
+        )
+
         data_transforms = _transforms.Group(
-            inputs=[echelon_policy.EchelonInputs(action_dim=model_config.action_dim)],
+            inputs=[
+                echelon_policy.EchelonInputs(
+                    # state_dim=model_config.state_dim,
+                    action_dim=model_config.action_dim,
+                )
+            ],
             outputs=[echelon_policy.EchelonOutputs()],
         )
 
@@ -212,6 +233,7 @@ class LeRobotEchelonDataConfig(DataConfigFactory):
 
         return dataclasses.replace(
             self.create_base_config(assets_dirs),
+            repack_transforms=repack_transform,
             data_transforms=data_transforms,
             model_transforms=model_transforms,
             action_sequence_keys=self.action_sequence_keys,
@@ -440,7 +462,10 @@ _CONFIGS = [
     #
     TrainConfig(
         name="pi0_echelon",
-        model=pi0.Pi0Config(),
+        # model=pi0.Pi0EchelonConfig(),
+        model=pi0.Pi0Config(
+            action_dim=8,
+        ),
         data=LeRobotEchelonDataConfig(
             assets=AssetsConfig(asset_id="trossen"),
         ),
@@ -507,7 +532,9 @@ _CONFIGS = [
     #
     TrainConfig(
         name="pi0_echelon_sim",
-        model=pi0.Pi0Config(),
+        model=pi0.Pi0Config(
+            action_dim=8,
+        ),
         data=LeRobotEchelonDataConfig(
             repo_id="mattmazzola/echelon",
             base_config=DataConfig(

@@ -28,15 +28,19 @@ class EchelonInputs(transforms.DataTransformFn):
     - action: [7] - [dx,dy,dz,rx,ry,rz,gripper]
     """
 
+    # state_dim: int
     # The action dimension of the model. Will be used to pad state and actions.
     action_dim: int
 
     # The expected cameras names. All input cameras must be in this set. Missing cameras will be
     # replaced with black images and the corresponding `image_mask` will be set to False.
-    EXPECTED_CAMERAS: ClassVar[tuple[str, ...]] = "cam_low"
+    EXPECTED_CAMERAS: ClassVar[tuple[str, ...]] = ("cam_low",)
 
     def __call__(self, data: dict) -> dict:
-        # Get the state. We are padding from 14 to the model action dim.
+        # TODO: Pi models seem to assume state and action are the same shape
+        # Echelon model has 8 state dims and 7 action dims?
+        # state = transforms.pad_to_dim(data["state"], self.state_dim)
+        # Get the state. We are padding from 8 to the model action dim.
         state = transforms.pad_to_dim(data["state"], self.action_dim)
 
         in_images = data["images"]
@@ -60,9 +64,9 @@ class EchelonInputs(transforms.DataTransformFn):
         }
 
         # Actions are only available during training.
-        if "action" in data:
-            action = np.asarray(data["action"])
-            inputs["action"] = transforms.pad_to_dim(action, self.action_dim)
+        if "actions" in data:
+            actions = np.asarray(data["actions"])
+            inputs["actions"] = transforms.pad_to_dim(actions, self.action_dim)
 
         if "prompt" in data:
             inputs["prompt"] = data["prompt"]
