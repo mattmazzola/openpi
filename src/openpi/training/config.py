@@ -467,9 +467,7 @@ _CONFIGS = [
     TrainConfig(
         name="pi0_echelon",
         # model=pi0.Pi0EchelonConfig(),
-        model=pi0.Pi0Config(
-            action_dim=8,
-        ),
+        model=pi0.Pi0Config(),
         data=LeRobotEchelonDataConfig(
             assets=AssetsConfig(asset_id="trossen"),
         ),
@@ -536,9 +534,7 @@ _CONFIGS = [
     #
     TrainConfig(
         name="pi0_echelon_sim",
-        model=pi0.Pi0Config(
-            action_dim=8,
-        ),
+        model=pi0.Pi0Config(),
         data=LeRobotEchelonDataConfig(
             repo_id="mattmazzola/echelon",
             base_config=DataConfig(
