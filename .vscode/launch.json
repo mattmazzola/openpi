@@ -45,5 +45,24 @@
             ],
             "python": "${workspaceFolder}/.venv/bin/python"
         },
+        {
+            "name": "Train",
+            "type": "debugpy",
+            "request": "launch",
+            "justMyCode": false,
+            "program": "${workspaceFolder}/scripts/train.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+                "XLA_PYTHON_CLIENT_MEM_FRACTION": "0.9"
+            },
+            "args": [
+                "pi0_echelon_sim",
+                "--exp-name",
+                "echelon_train_01",
+                "--overwrite",
+            ],
+            "python": "${workspaceFolder}/.venv/bin/python"
+        },
     ]
 }
