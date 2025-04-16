@@ -8,7 +8,7 @@
             "name": "Convert Libero to LeRobot",
             "type": "debugpy",
             "request": "launch",
-            "module": "scripts.convert_libero_data_to_lerobot",
+            "module": "examples.libero.convert_libero_data_to_lerobot",
             "justMyCode": false,
             "args": [
                 "--data-dir",
