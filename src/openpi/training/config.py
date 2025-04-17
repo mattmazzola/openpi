@@ -222,13 +222,12 @@ class LeRobotEchelonDataConfig(DataConfigFactory):
         data_transforms = _transforms.Group(
             inputs=[
                 echelon_policy.EchelonInputs(
-                    # state_dim=model_config.state_dim,
                     action_dim=model_config.action_dim,
                 )
             ],
             outputs=[
                 echelon_policy.EchelonOutputs(
-                    action_dim=model_config.action_dim,
+                    action_output_dim=7,
                 )
             ],
         )
@@ -469,7 +468,7 @@ _CONFIGS = [
         # model=pi0.Pi0EchelonConfig(),
         model=pi0.Pi0Config(),
         data=LeRobotEchelonDataConfig(
-            assets=AssetsConfig(asset_id="trossen"),
+            assets=AssetsConfig(asset_id="mattmazzola/echelon"),
         ),
     ),
     #

@@ -64,5 +64,19 @@
             ],
             "python": "${workspaceFolder}/.venv/bin/python"
         },
+        {
+            "name": "Inference Single Dummy Example",
+            "type": "debugpy",
+            "request": "launch",
+            "justMyCode": false,
+            "program": "${workspaceFolder}/scripts/inference.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+            },
+            "args": [
+            ],
+            "python": "${workspaceFolder}/.venv/bin/python"
+        },
     ]
 }

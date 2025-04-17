@@ -37,9 +37,8 @@ class EchelonInputs(transforms.DataTransformFn):
     EXPECTED_CAMERAS: ClassVar[tuple[str, ...]] = ("cam_low",)
 
     def __call__(self, data: dict) -> dict:
-        # TODO: Pi models seem to assume state and action are the same shape
-        # Echelon model has 8 state dims and 7 action dims?
-        # state = transforms.pad_to_dim(data["state"], self.state_dim)
+        # TODO: Pi models assumes state and action are the same shape
+        # Echelon model has 8 state dims and 7 action dims
         # Get the state. We are padding from 8 to the model action dim.
         state = transforms.pad_to_dim(data["state"], self.action_dim)
 
@@ -101,10 +100,9 @@ class EchelonInputs(transforms.DataTransformFn):
 class EchelonOutputs(transforms.DataTransformFn):
     """Outputs for the Echelon policy."""
 
-    action_dim: int
+    action_output_dim: int
 
     def __call__(self, data: dict) -> dict:
-        # TODO: Use action_dim here also instead of hardcoding
         # Only return the first 7 dims.
-        action = np.asarray(data["action"][:7])
-        return {"action": action}
+        actions = np.asarray(data["actions"][:, : self.action_output_dim])
+        return {"actions": actions}

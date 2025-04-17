@@ -1,17 +1,26 @@
-from openpi.training import config
+from pathlib import Path
+import re
+from openpi.training import config as _config
 from openpi.policies import policy_config
 from openpi.shared import download
+from openpi.policies import echelon_policy
 
-config = config.get_config("pi0_fast_droid")
-checkpoint_dir = download.maybe_download("s3://openpi-assets/checkpoints/pi0_fast_droid")
+
+config = _config.get_config("pi0_echelon")
+checkpoint_dir = download.maybe_download("/home/mattm/openpi/checkpoints/pi0_echelon_sim/echelon_train_01/19999")
 
 # Create a trained policy.
 policy = policy_config.create_trained_policy(config, checkpoint_dir)
 
 # Run inference on a dummy example.
-example = {
-    "observation/exterior_image_1_left": ...,
-    "observation/wrist_image_left": ...,
-    "prompt": "pick up the fork"
-}
-action_chunk = policy.infer(example)["actions"]
+example = echelon_policy.make_echelon_example()
+result = policy.infer(example)
+
+# Delete the policy to free up memory.
+del policy
+
+print("Actions shape:", result["actions"].shape)
+print("Actions:")
+print(result["actions"][:3])
+print("...")
+print(result["actions"][-3:])
