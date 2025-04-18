@@ -102,7 +102,19 @@ $AML_WORKSPACE_NAME
 amlt run aml/finetune-openpi-echelon-amulet.yaml echelon-openpi-finetune --yes -d ""
 ```
 
-### Amulet Resources
+## Other Amulet Notes
+
+### Resources
 
 https://amulet-docs.azurewebsites.net/
 https://dev.azure.com/dlmm/_git/ProjectWillow?path=/amlt/README.md
+
+### Useful Commands
+
+
+#### Get target SKUs by type
+
+```bash
+amlt cache instance-types -I A100
+amlt cache instance-types -I MI300
+```
