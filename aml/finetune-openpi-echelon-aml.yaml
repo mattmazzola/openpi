@@ -1,0 +1,44 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
+type: command
+
+experiment_name: finetune-openpi-echelon
+display_name: Finetune OpenPI Echelon
+description: Finetune OpenVLA on Echelon
+
+# compute: azureml:nc6v3
+compute: msrresrchbasicvc
+
+environment:
+  # image: mcr.microsoft.com/azureml/openmpi4.1.0-cuda11.6-cudnn8-ubuntu20.04:latest
+  image: mcr.microsoft.com/azureml/inference-base-cuda12.4-ubuntu22.04
+
+code: ../src
+
+environment_variables:
+  XLA_PYTHON_CLIENT_MEM_FRACTION: "0.9"
+
+# identity:
+#   type: user_identity
+#   type: managed 
+
+# https://learn.microsoft.com/en-us/azure/machine-learning/reference-yaml-job-command?view=azureml-api-2#job-inputs
+inputs:
+  benchmark_data:
+    type: uri_folder
+    # path_on_compute: file:/mnt/data/benchmark_data
+    # path: https://yuwanechelon.blob.core.windows.net/data/atupini/erlds/benchamrk_01_post_quaternion_fix__20250404_original
+    path: azureml://datastores/yuwanechelon/paths/data/atupini/erlds/benchamrk_01_post_quaternion_fix__20250404_original
+
+# Undocumented feature to mount inputs to known paths
+# https://teams.microsoft.com/l/message/19:mj2a1444FgLJUI_I7LdFt0qmy63jq_XnO7B9uVDCeOY1@thread.tacv2/1694620096879?tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47&groupId=4fe31e05-a921-48ef-b85f-228071c4ce3b&parentMessageId=1680718113104&teamName=Ask%20AzureML%2BSingularity&channelName=General&createdTime=1694620096879
+properties:
+  AZURE_ML_INPUT_PathOnCompute_benchmark_data: /mnt/data/benchmark_data
+
+command: |-
+  echo "Hello world"
+  echo ${{inputs.benchmark_data}}
+  ll ${{inputs.benchmark_data}}
+  ll /mnt/data/benchmark_data
+  echo "End"
+
+
