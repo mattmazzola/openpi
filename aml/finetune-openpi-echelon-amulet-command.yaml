@@ -25,9 +25,8 @@ storage:
 code:
   local_dir: $CONFIG_DIR/..
 
-search:
-  job_template:
-    name: finetune-openpi-on--benchamrk_01
+jobs:
+  - name: finetune-openpi-on--benchamrk_01
     sku: G4-A100
     # sku: G4-A100-NvLink
     # sku: G8-H100-NvLink
@@ -58,12 +57,4 @@ search:
         MKL_THREADING_LAYER: GNU
         _AZUREML_SINGULARITY_JOB_UAI: /subscriptions/2cd190bb-b42a-477c-b1bb-2f20932d8dc5/resourceGroups/Reuben-Tan/providers/Microsoft.ManagedIdentity/userAssignedIdentities/reubenuai
 
-  max_trials: 1
-  type: grid
-  params:
-    - name: nnodes
-      spec: discrete
-      values: [
-         1
-      ]  
  
