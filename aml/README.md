@@ -52,9 +52,6 @@ az ml job create -f aml/finetune-openpi-echelon-aml.yaml \
 
 ## Other (Amulet)
 
-https://dev.azure.com/dlmm/_git/ProjectWillow?path=/amlt/README.md
-
-
 ### Add storage credential
 
 ```bash
@@ -104,3 +101,8 @@ $AML_WORKSPACE_NAME
 ```bash
 amlt run aml/finetune-openpi-echelon-amulet.yaml echelon-openpi-finetune --yes -d ""
 ```
+
+### Amulet Resources
+
+https://amulet-docs.azurewebsites.net/
+https://dev.azure.com/dlmm/_git/ProjectWillow?path=/amlt/README.md
