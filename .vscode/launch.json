@@ -78,5 +78,21 @@
             ],
             "python": "${workspaceFolder}/.venv/bin/python"
         },
+        {
+            "name": "Inference WS Client",
+            "type": "debugpy",
+            "request": "launch",
+            "justMyCode": false,
+            "program": "${workspaceFolder}/examples/simple_client/main.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+            },
+            "args": [
+                "--env",
+                "ALOHA_SIM",
+            ],
+            "python": "${workspaceFolder}/.venv/bin/python"
+        },
     ]
 }

@@ -27,6 +27,13 @@ class Args:
 
 
 def main(args: Args) -> None:
+    policy = _websocket_client_policy.WebsocketClientPolicy(
+        host=args.host,
+        port=args.port,
+    )
+    logging.info(f"Server metadata: {policy.get_server_metadata()}")
+
+    logging.info(f"Using env: {args.env}")
     obs_fn = {
         EnvMode.ALOHA: _random_observation_aloha,
         EnvMode.ALOHA_SIM: _random_observation_aloha,
@@ -34,18 +41,15 @@ def main(args: Args) -> None:
         EnvMode.LIBERO: _random_observation_libero,
     }[args.env]
 
-    policy = _websocket_client_policy.WebsocketClientPolicy(
-        host=args.host,
-        port=args.port,
-    )
-    logging.info(f"Server metadata: {policy.get_server_metadata()}")
-
     # Send 1 observation to make sure the model is loaded.
     policy.infer(obs_fn())
 
+    logging.info("Inference starting...")
     start = time.time()
     for _ in range(args.num_steps):
-        policy.infer(obs_fn())
+        obs = obs_fn()
+        policy.infer(obs)
+    logging.info("Inference finished.")
     end = time.time()
 
     print(f"Total time taken: {end - start:.2f} s")
