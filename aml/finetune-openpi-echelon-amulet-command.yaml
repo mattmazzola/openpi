@@ -41,13 +41,15 @@ jobs:
 
     - export WANDB_PROJECT=$WANDB_PROJECT
     - export WANDB_API_KEY=$WANDB_API_KEY
-    # - wandb login --host=$WANDB_BASE_URL
+    - wandb login --host=$WANDB_BASE_URL
+    - wandb login --verify
 
     - ls -l /mnt/data
 
     - DATASET_NAME=benchamrk_01_post_quaternion_fix__20250404_original
 
-    - echo "keykey" > .hf_token
+    - export HF_TOKEN=$HF_TOKEN
+    - huggingface-cli login --token $HF_TOKEN
 
     submit_args:
       env:
