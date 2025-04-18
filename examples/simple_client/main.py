@@ -48,7 +48,9 @@ def main(args: Args) -> None:
     start = time.time()
     for _ in range(args.num_steps):
         obs = obs_fn()
-        policy.infer(obs)
+        actions = policy.infer(obs)
+        logging.debug(f"Actions: {actions}")
+
     logging.info("Inference finished.")
     end = time.time()
 
