@@ -51,9 +51,6 @@ search:
     - echo "keykey" > .hf_token
 
     submit_args:
-      container_args:
-        shm_size: 256g
-        ipc: host
       env:
         NCCL_IB_DISABLE: 0
         NCCL_DEBUG: INFO
