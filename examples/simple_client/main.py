@@ -15,6 +15,7 @@ class EnvMode(enum.Enum):
     ALOHA_SIM = "aloha_sim"
     DROID = "droid"
     LIBERO = "libero"
+    ECHELON = "echelon"
 
 
 @dataclasses.dataclass
@@ -39,6 +40,7 @@ def main(args: Args) -> None:
         EnvMode.ALOHA_SIM: _random_observation_aloha,
         EnvMode.DROID: _random_observation_droid,
         EnvMode.LIBERO: _random_observation_libero,
+        EnvMode.ECHELON: _random_observation_echelon,
     }[args.env]
 
     # Send 1 observation to make sure the model is loaded.
@@ -66,6 +68,16 @@ def _random_observation_aloha() -> dict:
             "cam_low": np.random.randint(256, size=(3, 224, 224), dtype=np.uint8),
             "cam_left_wrist": np.random.randint(256, size=(3, 224, 224), dtype=np.uint8),
             "cam_right_wrist": np.random.randint(256, size=(3, 224, 224), dtype=np.uint8),
+        },
+        "prompt": "do something",
+    }
+
+
+def _random_observation_echelon() -> dict:
+    return {
+        "state": np.ones((8,)),
+        "images": {
+            "cam_low": np.random.randint(256, size=(3, 224, 224), dtype=np.uint8),
         },
         "prompt": "do something",
     }
