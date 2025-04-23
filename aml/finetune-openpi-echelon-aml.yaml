@@ -6,7 +6,11 @@ display_name: Finetune OpenPI Echelon
 description: Finetune OpenVLA on Echelon
 
 # compute: azureml:nc6v3
-compute: msrresrchbasicvc
+# compute: azureml:msrresrchbasicvc
+
+# See private docs for setting compute to a resource URI:
+# https://dev.azure.com/msresearch/GCR/_wiki/wikis/GCR%20Wiki/14263/Job-Submission-using-AML-SDKv2-(and-bring-your-own-workspace)?anchor=default-vc-info
+compute: /subscriptions/22da88f6-1210-4de2-a5a3-da4c7c2a1213/resourceGroups/gcr-singularity/providers/Microsoft.MachineLearningServices/virtualclusters/msrresrchbasicvc
 
 environment:
   # image: mcr.microsoft.com/azureml/openmpi4.1.0-cuda11.6-cudnn8-ubuntu20.04:latest
@@ -16,6 +20,9 @@ code: ../src
 
 environment_variables:
   XLA_PYTHON_CLIENT_MEM_FRACTION: "0.9"
+  JOB_EXECUTION_MODE: "basic"
+  AZUREML_COMPUTE_USE_COMMON_RUNTIME: 'true'
+  _AZUREML_SINGULARITY_JOB_UAI: /subscriptions/2cd190bb-b42a-477c-b1bb-2f20932d8dc5/resourceGroups/Reuben-Tan/providers/Microsoft.ManagedIdentity/userAssignedIdentities/reubenuai
 
 # https://learn.microsoft.com/en-us/azure/machine-learning/reference-yaml-job-command?view=azureml-api-2#managedidentityconfiguration:~:text=output%20specification.-,identity,-object
 identity:
