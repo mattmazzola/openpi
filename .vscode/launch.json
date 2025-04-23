@@ -37,7 +37,8 @@
             "program": "${workspaceFolder}/scripts/compute_norm_stats.py",
             "console": "integratedTerminal",
             "env": {
-                "PYTHONPATH": "${workspaceFolder}"
+                "PYTHONPATH": "${workspaceFolder}",
+                // "CUDA_VISIBLE_DEVICES": "0",
             },
             "args": [
                 "--config-name",
