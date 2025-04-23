@@ -27,7 +27,8 @@
                 "--dataset-name",
                 "benchamrk_01_post_quaternion_fix__20250404_original",
                 // "--push-to-hub",
-            ]
+            ],
+            "python": "${workspaceFolder}/.venv/bin/python"
         },
         {
             "name": "Compute Norm Stats",
