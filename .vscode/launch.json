@@ -65,6 +65,27 @@
             "python": "${workspaceFolder}/.venv/bin/python"
         },
         {
+            "name": "Inference WS Server",
+            "type": "debugpy",
+            "request": "launch",
+            "justMyCode": false,
+            "program": "${workspaceFolder}/scripts/serve_policy.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+                "XLA_PYTHON_CLIENT_MEM_FRACTION": "0.9"
+            },
+            "args": [
+                "policy:checkpoint",
+                "--policy.config",
+                "pi0_echelon",
+                "--policy.dir",
+                "checkpoints/pi0_echelon_sim/echelon_train_01/19999",
+                
+            ],
+            "python": "${workspaceFolder}/.venv/bin/python"
+        },
+        {
             "name": "Inference Single Dummy Example",
             "type": "debugpy",
             "request": "launch",
