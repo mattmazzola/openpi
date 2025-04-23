@@ -90,8 +90,7 @@
             },
             "args": [
                 "--env",
-                "ALOHA_SIM",
-                // "ECHELON",
+                "ECHELON",
             ],
             "python": "${workspaceFolder}/.venv/bin/python"
         },
