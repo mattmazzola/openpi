@@ -559,6 +559,7 @@ _CONFIGS = [
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader("s3://openpi-assets/checkpoints/pi0_base/params"),
         num_train_steps=20_000,
+        fsdp_devices=4,
     ),
     TrainConfig(
         name="pi0_echelon_sim_ja",
@@ -572,6 +573,7 @@ _CONFIGS = [
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader("s3://openpi-assets/checkpoints/pi0_base/params"),
         num_train_steps=20_000,
+        fsdp_devices=4,
     ),
     TrainConfig(
         name="pi0_echelon_sim_ja_fuzzed",
@@ -585,6 +587,7 @@ _CONFIGS = [
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader("s3://openpi-assets/checkpoints/pi0_base/params"),
         num_train_steps=20_000,
+        fsdp_devices=4,
     ),
     #
     # Fine-tuning Libero configs.
