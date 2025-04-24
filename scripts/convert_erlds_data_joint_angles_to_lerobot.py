@@ -40,13 +40,13 @@ def get_state_action(step: dict[str, Any]) -> tuple[tf.Tensor, tf.Tensor]:
     assert robot_state is not None
 
     action_joint_angles = action["joint_position_r"][:ur3e_joints_max_index]
-    action_eef_activation = action["end_effector_action_r"]
-    action_eef_activation = tf.clip_by_value(action_eef_activation, 0.0, 1.0)
+    action_eef_action = action["end_effector_action_r"]
+    action_eef_action = tf.clip_by_value(action_eef_action, 0.0, 1.0)
 
     robot_action = tf.concat(
         [
             action_joint_angles,
-            action_eef_activation,
+            action_eef_action,
         ],
         axis=-1,
     )
