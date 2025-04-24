@@ -471,6 +471,14 @@ _CONFIGS = [
             assets=AssetsConfig(asset_id="mattmazzola/echelon-joint-angles"),
         ),
     ),
+    TrainConfig(
+        name="pi0_echelon_fuzzed",
+        # model=pi0.Pi0EchelonConfig(),
+        model=pi0.Pi0Config(),
+        data=LeRobotEchelonDataConfig(
+            assets=AssetsConfig(asset_id="mattmazzola/echelon-joint-angles-fuzzed"),
+        ),
+    ),
     #
     # Inference Aloha configs.
     #
@@ -536,6 +544,19 @@ _CONFIGS = [
         model=pi0.Pi0Config(),
         data=LeRobotEchelonDataConfig(
             repo_id="mattmazzola/echelon-joint-angles",
+            base_config=DataConfig(
+                local_files_only=True,
+                prompt_from_task=True,
+            ),
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("s3://openpi-assets/checkpoints/pi0_base/params"),
+        num_train_steps=20_000,
+    ),
+    TrainConfig(
+        name="pi0_echelon_sim_fuzzed",
+        model=pi0.Pi0Config(),
+        data=LeRobotEchelonDataConfig(
+            repo_id="mattmazzola/echelon-joint-angles-fuzzed",
             base_config=DataConfig(
                 local_files_only=True,
                 prompt_from_task=True,
