@@ -24,8 +24,8 @@ class EchelonInputs(transforms.DataTransformFn):
 
     Expected inputs:
     - images: dict[name, img] where img is [channel, height, width]. name must be in EXPECTED_CAMERAS.
-    - state: [7] - [ja0,ja1,ja2,ja3,ja4,ja5,gripper_action]
-    - action: [7] - [ja0,ja1,ja2,ja3,ja4,ja5,gripper_action]
+    - state: [7] - [ja0,ja1,ja2,ja3,ja4,ja5,gripper_action] (6 joint angles in radians + gripper action 0.0 or 1.0)
+    - action: [7] - [ja0,ja1,ja2,ja3,ja4,ja5,gripper_action] (6 joint angles in radians + gripper action 0.0 or 1.0)
     """
 
     # state_dim: int
