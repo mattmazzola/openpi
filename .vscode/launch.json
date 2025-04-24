@@ -60,7 +60,7 @@
             },
             "args": [
                 "--config-name",
-                "pi0_echelon_sim_fuzzed"
+                "pi0_echelon_sim_ja"
             ],
             "python": "${workspaceFolder}/.venv/bin/python"
         },
@@ -76,9 +76,9 @@
                 "XLA_PYTHON_CLIENT_MEM_FRACTION": "0.9"
             },
             "args": [
-                "pi0_echelon_sim",
+                "pi0_echelon_sim_ja",
                 "--exp-name",
-                "echelon_train_01",
+                "echelon_train_ja_01",
                 "--overwrite",
             ],
             "python": "${workspaceFolder}/.venv/bin/python"
