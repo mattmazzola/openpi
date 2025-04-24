@@ -99,7 +99,7 @@ $AML_WORKSPACE_NAME
 ### Submit Job
 
 ```bash
-amlt run aml/finetune-openpi-echelon-amulet.yaml echelon-openpi-finetune --yes -d ""
+amlt run aml/finetune-openpi-echelon-amulet-command.yaml echelon-openpi-finetune --yes -d ""
 ```
 
 ## Other Notes
