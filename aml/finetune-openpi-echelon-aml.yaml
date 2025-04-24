@@ -1,0 +1,66 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
+type: command
+
+experiment_name: finetune-openpi-echelon
+display_name: Finetune OpenPI Echelon
+description: Finetune OpenVLA on Echelon
+
+# compute: azureml:nc6v3
+# compute: azureml:msrresrchbasicvc
+
+# See private docs for setting compute to a resource URI:
+# https://dev.azure.com/msresearch/GCR/_wiki/wikis/GCR%20Wiki/14263/Job-Submission-using-AML-SDKv2-(and-bring-your-own-workspace)?anchor=default-vc-info
+compute: /subscriptions/22da88f6-1210-4de2-a5a3-da4c7c2a1213/resourceGroups/gcr-singularity/providers/Microsoft.MachineLearningServices/virtualclusters/msrresrchbasicvc
+
+resources:
+  instance_count: 1
+  # NC_A100_v4
+  instance_type: Singularity.NC24ad_A100_v4
+  # instance_type: Singularity.NC48ad_A100_v4
+
+environment:
+  # image: mcr.microsoft.com/azureml/openmpi4.1.0-cuda11.6-cudnn8-ubuntu20.04:latest
+  image: mcr.microsoft.com/azureml/inference-base-cuda12.4-ubuntu22.04
+
+code: ../src
+
+environment_variables:
+  XLA_PYTHON_CLIENT_MEM_FRACTION: "0.9"
+  JOB_EXECUTION_MODE: "basic"
+  AZUREML_COMPUTE_USE_COMMON_RUNTIME: 'true'
+  _AZUREML_SINGULARITY_JOB_UAI: /subscriptions/2cd190bb-b42a-477c-b1bb-2f20932d8dc5/resourceGroups/Reuben-Tan/providers/Microsoft.ManagedIdentity/userAssignedIdentities/reubenuai
+
+# https://learn.microsoft.com/en-us/azure/machine-learning/reference-yaml-job-command?view=azureml-api-2#managedidentityconfiguration:~:text=output%20specification.-,identity,-object
+identity:
+  type: managed
+
+# https://learn.microsoft.com/en-us/azure/machine-learning/reference-yaml-job-command?view=azureml-api-2#job-inputs
+inputs:
+  benchmark_data:
+    type: uri_folder
+    # path_on_compute: file:/mnt/data/benchmark_data
+    # path: https://yuwanechelon.blob.core.windows.net/data/atupini/erlds/benchamrk_01_post_quaternion_fix__20250404_original
+    path: azureml://datastores/yuwanechelon/paths/data/atupini/erlds/benchamrk_01_post_quaternion_fix__20250404_original
+
+# Undocumented feature to mount inputs to known paths
+# https://teams.microsoft.com/l/message/19:mj2a1444FgLJUI_I7LdFt0qmy63jq_XnO7B9uVDCeOY1@thread.tacv2/1694620096879?tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47&groupId=4fe31e05-a921-48ef-b85f-228071c4ce3b&parentMessageId=1680718113104&teamName=Ask%20AzureML%2BSingularity&channelName=General&createdTime=1694620096879
+properties:
+  AZURE_ML_INPUT_PathOnCompute_benchmark_data: /mnt/data/benchmark_data
+
+command: |-
+  echo "Hello world"
+
+  nvidia-smi
+
+  echo "Verify input path"
+  echo ${{inputs.benchmark_data}}
+
+  echo "Verify input data"
+  ll ${{inputs.benchmark_data}}
+
+  echo "Verify mounted path"
+  ll /mnt/data/benchmark_data
+
+  echo "End"
+
+

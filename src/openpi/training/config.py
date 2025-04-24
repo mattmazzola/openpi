@@ -17,6 +17,7 @@ import openpi.models.model as _model
 import openpi.models.pi0 as pi0
 import openpi.models.pi0_fast as pi0_fast
 import openpi.models.tokenizer as _tokenizer
+import openpi.policies.echelon_policy as echelon_policy
 import openpi.policies.aloha_policy as aloha_policy
 import openpi.policies.droid_policy as droid_policy
 import openpi.policies.libero_policy as libero_policy
@@ -193,6 +194,52 @@ class SimpleDataConfig(DataConfigFactory):
             data_transforms=self.data_transforms(model_config),
             model_transforms=self.model_transforms(model_config),
             use_quantile_norm=model_config.model_type == ModelType.PI0_FAST,
+        )
+
+
+@dataclasses.dataclass(frozen=True)
+class LeRobotEchelonDataConfig(DataConfigFactory):
+    action_sequence_keys: Sequence[str] = ("action",)
+
+    @override
+    def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
+        repack_transform = _transforms.Group(
+            inputs=[
+                _transforms.RepackTransform(
+                    {
+                        "state": "state",
+                        # Actions key is required for computing norm stats
+                        "actions": "action",
+                        "images": {
+                            "cam_low": "image",
+                        },
+                        "prompt": "prompt",
+                    }
+                )
+            ]
+        )
+
+        data_transforms = _transforms.Group(
+            inputs=[
+                echelon_policy.EchelonInputs(
+                    action_dim=model_config.action_dim,
+                )
+            ],
+            outputs=[
+                echelon_policy.EchelonOutputs(
+                    action_output_dim=7,
+                )
+            ],
+        )
+
+        model_transforms = ModelTransformFactory()(model_config)
+
+        return dataclasses.replace(
+            self.create_base_config(assets_dirs),
+            repack_transforms=repack_transform,
+            data_transforms=data_transforms,
+            model_transforms=model_transforms,
+            action_sequence_keys=self.action_sequence_keys,
         )
 
 
@@ -414,6 +461,17 @@ class TrainConfig:
 # Use `get_config` if you need to get a config by name in your code.
 _CONFIGS = [
     #
+    # Inference Echelon configs.
+    #
+    TrainConfig(
+        name="pi0_echelon",
+        # model=pi0.Pi0EchelonConfig(),
+        model=pi0.Pi0Config(),
+        data=LeRobotEchelonDataConfig(
+            assets=AssetsConfig(asset_id="mattmazzola/echelon"),
+        ),
+    ),
+    #
     # Inference Aloha configs.
     #
     TrainConfig(
@@ -469,6 +527,22 @@ _CONFIGS = [
                 prompt_from_task=True,
             ),
         ),
+    ),
+    #
+    # Fine-tuning Echelon configs.
+    #
+    TrainConfig(
+        name="pi0_echelon_sim",
+        model=pi0.Pi0Config(),
+        data=LeRobotEchelonDataConfig(
+            repo_id="mattmazzola/echelon",
+            base_config=DataConfig(
+                local_files_only=True,
+                prompt_from_task=True,
+            ),
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("s3://openpi-assets/checkpoints/pi0_base/params"),
+        num_train_steps=20_000,
     ),
     #
     # Fine-tuning Libero configs.

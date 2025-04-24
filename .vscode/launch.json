@@ -1,0 +1,120 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Convert Libero to LeRobot",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "examples.libero.convert_libero_data_to_lerobot",
+            "justMyCode": false,
+            "args": [
+                "--data-dir",
+                "~/modified_libero_rlds/"
+            ]
+        },
+        {
+            "name": "Convert ERLDS to LeRobot",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "scripts.convert_erlds_data_to_lerobot",
+            "justMyCode": false,
+            "args": [
+                "--data-dir",
+                "~/echelondata/benchmark_01/atupini",
+                "--dataset-name",
+                "benchamrk_01_post_quaternion_fix__20250404_original",
+                // "--push-to-hub",
+            ],
+            "python": "${workspaceFolder}/.venv/bin/python"
+        },
+        {
+            "name": "Compute Norm Stats",
+            "type": "debugpy",
+            "request": "launch",
+            "justMyCode": false,
+            "program": "${workspaceFolder}/scripts/compute_norm_stats.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+                // "CUDA_VISIBLE_DEVICES": "0",
+            },
+            "args": [
+                "--config-name",
+                "pi0_echelon_sim"
+            ],
+            "python": "${workspaceFolder}/.venv/bin/python"
+        },
+        {
+            "name": "Train",
+            "type": "debugpy",
+            "request": "launch",
+            "justMyCode": false,
+            "program": "${workspaceFolder}/scripts/train.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+                "XLA_PYTHON_CLIENT_MEM_FRACTION": "0.9"
+            },
+            "args": [
+                "pi0_echelon_sim",
+                "--exp-name",
+                "echelon_train_01",
+                "--overwrite",
+            ],
+            "python": "${workspaceFolder}/.venv/bin/python"
+        },
+        {
+            "name": "Inference WS Server",
+            "type": "debugpy",
+            "request": "launch",
+            "justMyCode": false,
+            "program": "${workspaceFolder}/scripts/serve_policy.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+                "XLA_PYTHON_CLIENT_MEM_FRACTION": "0.9"
+            },
+            "args": [
+                "policy:checkpoint",
+                "--policy.config",
+                "pi0_echelon",
+                "--policy.dir",
+                "checkpoints/pi0_echelon_sim/echelon_train_01/19999",
+            ],
+            "python": "${workspaceFolder}/.venv/bin/python"
+        },
+        {
+            "name": "Inference Single Dummy Example",
+            "type": "debugpy",
+            "request": "launch",
+            "justMyCode": false,
+            "program": "${workspaceFolder}/scripts/inference.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+            },
+            "args": [
+            ],
+            "python": "${workspaceFolder}/.venv/bin/python"
+        },
+        {
+            "name": "Inference WS Client",
+            "type": "debugpy",
+            "request": "launch",
+            "justMyCode": false,
+            "program": "${workspaceFolder}/examples/simple_client/main.py",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+            },
+            "args": [
+                "--env",
+                "ECHELON",
+            ],
+            "python": "${workspaceFolder}/.venv/bin/python"
+        },
+    ]
+}

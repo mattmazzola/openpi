@@ -1,0 +1,61 @@
+description: Finetune OpenVLA on Echelon
+
+target:
+  service: sing
+  # name: msrresrchvc
+  name: msrresrchbasicvc
+  workspace_name: reubenws
+
+environment:
+  image: amlt-sing/acpt-torch2.3.1-py3.10-cuda12.1-ubuntu22.04
+
+  setup:
+    - echo "start" 
+    - pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
+
+storage:
+  data:
+    storage_account_name: yuwanechelon
+    container_name: data
+
+# data:
+#   local_dir: /home/andreatupini/tensorflow_datasets/echelon/benchamrk_01_post_quaternion_fix__20250404_original
+#   remote_dir: atupini/erlds/benchamrk_01_post_quaternion_fix__20250404_original
+
+code:
+  local_dir: $CONFIG_DIR/..
+
+jobs:
+  - name: finetune-openpi-on--benchamrk_01
+    sku: G4-A100
+    # sku: G4-A100-NvLink
+    # sku: G8-H100-NvLink
+
+    priority: high
+    mpi: False
+    sla_tier: Standard
+    process_count_per_node: 1
+    identity: managed
+    command:
+    - sudo apt-get -y install git git-lfs
+
+    - export WANDB_PROJECT=$WANDB_PROJECT
+    - export WANDB_API_KEY=$WANDB_API_KEY
+    - wandb login --host=$WANDB_BASE_URL
+
+    - ls -l /mnt/data
+
+    - DATASET_NAME=benchamrk_01_post_quaternion_fix__20250404_original
+
+    - export HF_TOKEN=$HF_TOKEN
+    - huggingface-cli login --token $HF_TOKEN
+
+    submit_args:
+      env:
+        NCCL_IB_DISABLE: 0
+        NCCL_DEBUG: INFO
+        NCCL_IB_TIMEOUT: 60
+        MKL_THREADING_LAYER: GNU
+        _AZUREML_SINGULARITY_JOB_UAI: /subscriptions/2cd190bb-b42a-477c-b1bb-2f20932d8dc5/resourceGroups/Reuben-Tan/providers/Microsoft.ManagedIdentity/userAssignedIdentities/reubenuai
+
+ 

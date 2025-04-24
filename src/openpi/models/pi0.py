@@ -141,6 +141,12 @@ class Pi0Config(_model.BaseModelConfig):
         return nnx.All(*filters)
 
 
+@dataclasses.dataclass(frozen=True)
+class Pi0EchelonConfig(Pi0Config):
+    state_dim: int = 8
+    action_dim: int = 7
+
+
 class Pi0(_model.BaseModel):
     def __init__(self, config: Pi0Config, rngs: nnx.Rngs):
         super().__init__(config.action_dim, config.action_horizon, config.max_token_len)

@@ -15,6 +15,7 @@ class EnvMode(enum.Enum):
     ALOHA_SIM = "aloha_sim"
     DROID = "droid"
     LIBERO = "libero"
+    ECHELON = "echelon"
 
 
 @dataclasses.dataclass
@@ -27,25 +28,32 @@ class Args:
 
 
 def main(args: Args) -> None:
-    obs_fn = {
-        EnvMode.ALOHA: _random_observation_aloha,
-        EnvMode.ALOHA_SIM: _random_observation_aloha,
-        EnvMode.DROID: _random_observation_droid,
-        EnvMode.LIBERO: _random_observation_libero,
-    }[args.env]
-
     policy = _websocket_client_policy.WebsocketClientPolicy(
         host=args.host,
         port=args.port,
     )
     logging.info(f"Server metadata: {policy.get_server_metadata()}")
 
+    logging.info(f"Using env: {args.env}")
+    obs_fn = {
+        EnvMode.ALOHA: _random_observation_aloha,
+        EnvMode.ALOHA_SIM: _random_observation_aloha,
+        EnvMode.DROID: _random_observation_droid,
+        EnvMode.LIBERO: _random_observation_libero,
+        EnvMode.ECHELON: _random_observation_echelon,
+    }[args.env]
+
     # Send 1 observation to make sure the model is loaded.
     policy.infer(obs_fn())
 
+    logging.info("Inference starting...")
     start = time.time()
     for _ in range(args.num_steps):
-        policy.infer(obs_fn())
+        obs = obs_fn()
+        actions = policy.infer(obs)
+        logging.debug(f"Actions: {actions}")
+
+    logging.info("Inference finished.")
     end = time.time()
 
     print(f"Total time taken: {end - start:.2f} s")
@@ -60,6 +68,16 @@ def _random_observation_aloha() -> dict:
             "cam_low": np.random.randint(256, size=(3, 224, 224), dtype=np.uint8),
             "cam_left_wrist": np.random.randint(256, size=(3, 224, 224), dtype=np.uint8),
             "cam_right_wrist": np.random.randint(256, size=(3, 224, 224), dtype=np.uint8),
+        },
+        "prompt": "do something",
+    }
+
+
+def _random_observation_echelon() -> dict:
+    return {
+        "state": np.ones((8,)),
+        "images": {
+            "cam_low": np.random.randint(256, size=(3, 224, 224), dtype=np.uint8),
         },
         "prompt": "do something",
     }

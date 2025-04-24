@@ -169,4 +169,5 @@ cython_debug/
 
 # Amulet
 amlt/
-.amltconfig
+third_party/
+*.hdf5
