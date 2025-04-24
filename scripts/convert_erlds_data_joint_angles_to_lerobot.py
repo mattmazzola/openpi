@@ -21,46 +21,31 @@ from typing import Any
 def get_state_action(step: dict[str, Any]) -> tuple[tf.Tensor, tf.Tensor]:
     observation = step["observation"]
     action = step["action"]
+    ur3e_joints_max_index = 6
 
-    # Robot state - EEF XYZ (3) + Quaternion (4) + Gripper Open/Close (1)
-    state_eef_position = observation["tip_cartesian_euler_position_r"]
-    state_eef_activation = observation["end_effector_action_r"]
-    state_eef_activation = tf.clip_by_value(state_eef_activation, 0.0, 1.0)
+    # Robot state - Joint angles (6) + Gripper Action (1)
+    # Joint angles are in radians, gripper action is a float between 0 and 1
+    state_joint_angles = observation["joint_position_r"][:ur3e_joints_max_index]
+    state_eef_action = observation["end_effector_action_r"]
+    state_eef_action = tf.clip_by_value(state_eef_action, 0.0, 1.0)
 
     robot_state = tf.concat(
         [
-            state_eef_position,
-            state_eef_activation,
+            state_joint_angles,
+            state_eef_action,
         ],
         axis=-1,
     )
 
     assert robot_state is not None
 
-    state_eef_xyz = state_eef_position[:3]
-    state_eef_orientation = state_eef_position[3:7]
-
-    # Robot action - EEF XYZ (3) + Quaternion (4) + Gripper Open/Close (1)
-    action_eef_position = action["tip_cartesian_euler_position_r"]
-    action_eef_xyz = action_eef_position[:3]
-    action_eef_orientation = action_eef_position[3:7]
-
-    # Calculate the delta (target state - current state)
-    action_xyz_delta = action_eef_xyz - state_eef_xyz
-
-    # Wrap the SciPy operation with tf.py_function
-    action_rpy_delta = tf.py_function(
-        func=compute_rotation_delta,
-        inp=[state_eef_orientation, action_eef_orientation],
-        Tout=tf.float64,
-    )
+    action_joint_angles = action["joint_position_r"][:ur3e_joints_max_index]
     action_eef_activation = action["end_effector_action_r"]
     action_eef_activation = tf.clip_by_value(action_eef_activation, 0.0, 1.0)
 
     robot_action = tf.concat(
         [
-            action_xyz_delta,
-            action_rpy_delta,
+            action_joint_angles,
             action_eef_activation,
         ],
         axis=-1,
@@ -69,29 +54,12 @@ def get_state_action(step: dict[str, Any]) -> tuple[tf.Tensor, tf.Tensor]:
     return robot_state, robot_action
 
 
-def compute_rotation_delta(current, target):
-    assert current.shape[-1] == 4, f"Expected quaternions with 4 values, got shape {current.shape}"
-    assert target.shape[-1] == 4, f"Expected quaternions with 4 values, got shape {target.shape}"
-
-    # Create Rotation objects for current and target quaternions
-    current_r = Rotation.from_quat(current.numpy())
-    target_r = Rotation.from_quat(target.numpy())
-
-    # Compute the delta rotation: q_delta = q_target * q_current^(-1)
-    delta_r = target_r * current_r.inv()
-
-    # Convert to euler angles (roll, pitch, yaw in radians)
-    result = delta_r.as_euler("xyz")
-
-    return result
-
-
 def main(
     data_dir: str,
     dataset_name: str,
     *,
     push_to_hub: bool = False,
-    repo_name: str = "mattmazzola/echelon",
+    repo_name: str = "mattmazzola/echelon-joint-angles",
 ):
     # Clean up any existing dataset in the output directory
     output_path = LEROBOT_HOME / repo_name
@@ -113,7 +81,7 @@ def main(
             },
             "state": {
                 "dtype": "float32",
-                "shape": (8,),
+                "shape": (7,),
                 "names": ["state"],
             },
             "action": {

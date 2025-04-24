@@ -10,7 +10,7 @@ from openpi import transforms
 def make_echelon_example() -> dict:
     """Creates a random input example for the Echelon policy."""
     return {
-        "state": np.ones((8,)),
+        "state": np.ones((7,)),
         "images": {
             "cam_low": np.random.randint(256, size=(3, 512, 920), dtype=np.uint8),
         },
@@ -24,8 +24,8 @@ class EchelonInputs(transforms.DataTransformFn):
 
     Expected inputs:
     - images: dict[name, img] where img is [channel, height, width]. name must be in EXPECTED_CAMERAS.
-    - state: [8] - [x,y,y,qx,qy,qz,qw,gripper]
-    - action: [7] - [dx,dy,dz,rx,ry,rz,gripper]
+    - state: [7] - [ja0,ja1,ja2,ja3,ja4,ja5,gripper_action]
+    - action: [7] - [ja0,ja1,ja2,ja3,ja4,ja5,gripper_action]
     """
 
     # state_dim: int
@@ -37,9 +37,6 @@ class EchelonInputs(transforms.DataTransformFn):
     EXPECTED_CAMERAS: ClassVar[tuple[str, ...]] = ("cam_low",)
 
     def __call__(self, data: dict) -> dict:
-        # TODO: Pi models assumes state and action are the same shape
-        # Echelon model has 8 state dims and 7 action dims
-        # Get the state. We are padding from 8 to the model action dim.
         state = transforms.pad_to_dim(data["state"], self.action_dim)
 
         in_images = data["images"]

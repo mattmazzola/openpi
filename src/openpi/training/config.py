@@ -468,7 +468,7 @@ _CONFIGS = [
         # model=pi0.Pi0EchelonConfig(),
         model=pi0.Pi0Config(),
         data=LeRobotEchelonDataConfig(
-            assets=AssetsConfig(asset_id="mattmazzola/echelon"),
+            assets=AssetsConfig(asset_id="mattmazzola/echelon-joint-angles"),
         ),
     ),
     #
@@ -535,7 +535,7 @@ _CONFIGS = [
         name="pi0_echelon_sim",
         model=pi0.Pi0Config(),
         data=LeRobotEchelonDataConfig(
-            repo_id="mattmazzola/echelon",
+            repo_id="mattmazzola/echelon-joint-angles",
             base_config=DataConfig(
                 local_files_only=True,
                 prompt_from_task=True,

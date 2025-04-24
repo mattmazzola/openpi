@@ -23,7 +23,7 @@
             "justMyCode": false,
             "args": [
                 "--data-dir",
-                "~/echelondata/benchmark_01/atupini",
+                "~/echelondata/atupini/benchamrk_01_post_quaternion_fix/",
                 "--dataset-name",
                 "benchamrk_01_post_quaternion_fix__20250404_original",
                 // "--push-to-hub",
