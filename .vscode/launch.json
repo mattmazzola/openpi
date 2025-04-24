@@ -56,11 +56,11 @@
             "console": "integratedTerminal",
             "env": {
                 "PYTHONPATH": "${workspaceFolder}",
-                // "CUDA_VISIBLE_DEVICES": "0",
+                "CUDA_VISIBLE_DEVICES": "0",
             },
             "args": [
                 "--config-name",
-                "pi0_echelon_sim"
+                "pi0_echelon_sim_fuzzed"
             ],
             "python": "${workspaceFolder}/.venv/bin/python"
         },
