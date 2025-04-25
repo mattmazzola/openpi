@@ -48,6 +48,23 @@
             "python": "${workspaceFolder}/.venv/bin/python"
         },
         {
+            "name": "Convert ERLDS Joint Angles with Main and Right Arm Cams to LeRobot",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "scripts.convert_erlds_data_joint_angles_both_cams_to_lerobot",
+            "justMyCode": false,
+            "args": [
+                "--data-dir",
+                "~/echelondata/mattm/datasets/20250425_main_rightarm_cameras/",
+                "--dataset-name",
+                "echelon_original",
+                "--repo_name",
+                "mattmazzola/echelon-joint-angles-arm-cam",
+                "--push-to-hub",
+            ],
+            "python": "${workspaceFolder}/.venv/bin/python"
+        },
+        {
             "name": "Compute Norm Stats",
             "type": "debugpy",
             "request": "launch",
