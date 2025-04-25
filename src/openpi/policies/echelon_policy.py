@@ -40,8 +40,11 @@ class EchelonInputs(transforms.DataTransformFn):
         state = transforms.pad_to_dim(data["state"], self.action_dim)
 
         in_images = data["images"]
-        if set(in_images) - set(self.EXPECTED_CAMERAS):
-            raise ValueError(f"Expected images to contain {self.EXPECTED_CAMERAS}, got {tuple(in_images)}")
+        missing_cameras = set(self.EXPECTED_CAMERAS) - set(in_images)
+        if missing_cameras:
+            raise ValueError(
+                f"Expected images to contain {self.EXPECTED_CAMERAS}, got {tuple(in_images)}, missing {missing_cameras}"
+            )
 
         def convert_image(img):
             img = np.asarray(img)
