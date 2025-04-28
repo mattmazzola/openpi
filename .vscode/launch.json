@@ -94,9 +94,9 @@
                 "XLA_PYTHON_CLIENT_MEM_FRACTION": "0.9"
             },
             "args": [
-                "pi0_echelon_sim_ja",
+                "pi0_echelon_ja_original_arm_cam_train",
                 "--exp-name",
-                "echelon_train_ja_01",
+                "echelon_ja_original_arm_cam_train",
                 "--overwrite",
             ],
             "python": "${workspaceFolder}/.venv/bin/python"
