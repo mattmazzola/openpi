@@ -73,7 +73,7 @@ class EchelonInputs(transforms.DataTransformFn):
         }
         for dest, source in extra_image_names.items():
             if source in in_images:
-                images[dest] = in_images[source]
+                images[dest] = images_dict[source]
                 image_masks[dest] = np.True_
             else:
                 images[dest] = np.zeros_like(base_image)
