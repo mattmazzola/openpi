@@ -207,7 +207,7 @@ class BaseModelConfig(abc.ABC):
     method to create the corresponding model.
     """
 
-    # NOTE: Wanted to add space dim so we could have separate padding for state and action
+    # NOTE: Wanted to add state dim so we could have separate padding for state and action
     # However, this base class is used for all other configs and this cases runtime error
     # because they do not provide the required value.
 

@@ -16,17 +16,51 @@
             ]
         },
         {
-            "name": "Convert ERLDS to LeRobot",
+            "name": "Convert ERLDS EEF to LeRobot",
             "type": "debugpy",
             "request": "launch",
             "module": "scripts.convert_erlds_data_to_lerobot",
             "justMyCode": false,
             "args": [
                 "--data-dir",
-                "~/echelondata/benchmark_01/atupini",
+                "~/echelondata/atupini/benchamrk_01_post_quaternion_fix/",
                 "--dataset-name",
                 "benchamrk_01_post_quaternion_fix__20250404_original",
                 // "--push-to-hub",
+            ],
+            "python": "${workspaceFolder}/.venv/bin/python"
+        },
+        {
+            "name": "Convert ERLDS Joint Angles to LeRobot",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "scripts.convert_erlds_data_joint_angles_to_lerobot",
+            "justMyCode": false,
+            "args": [
+                "--data-dir",
+                "~/echelondata/mattm/datasets/20250424",
+                "--dataset-name",
+                "echelon_fuzzed",
+                "--repo_name",
+                "mattmazzola/echelon-joint-angles-fuzzed",
+                "--push-to-hub",
+            ],
+            "python": "${workspaceFolder}/.venv/bin/python"
+        },
+        {
+            "name": "Convert ERLDS Joint Angles with Main and Right Arm Cams to LeRobot",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "scripts.convert_erlds_data_joint_angles_both_cams_to_lerobot",
+            "justMyCode": false,
+            "args": [
+                "--data-dir",
+                "~/echelondata/mattm/datasets/20250425_main_rightarm_cameras/",
+                "--dataset-name",
+                "echelon_original",
+                "--repo_name",
+                "mattmazzola/echelon-joint-angles-arm-cam",
+                "--push-to-hub",
             ],
             "python": "${workspaceFolder}/.venv/bin/python"
         },
@@ -39,11 +73,12 @@
             "console": "integratedTerminal",
             "env": {
                 "PYTHONPATH": "${workspaceFolder}",
-                // "CUDA_VISIBLE_DEVICES": "0",
+                "CUDA_VISIBLE_DEVICES": "0",
             },
             "args": [
                 "--config-name",
-                "pi0_echelon_sim"
+                // "pi0_echelon_sim_ja",
+                "pi0_echelon_ja_original_arm_cam_train",
             ],
             "python": "${workspaceFolder}/.venv/bin/python"
         },
@@ -59,9 +94,9 @@
                 "XLA_PYTHON_CLIENT_MEM_FRACTION": "0.9"
             },
             "args": [
-                "pi0_echelon_sim",
+                "pi0_echelon_ja_original_arm_cam_train",
                 "--exp-name",
-                "echelon_train_01",
+                "echelon_ja_original_arm_cam_train",
                 "--overwrite",
             ],
             "python": "${workspaceFolder}/.venv/bin/python"

@@ -244,6 +244,53 @@ class LeRobotEchelonDataConfig(DataConfigFactory):
 
 
 @dataclasses.dataclass(frozen=True)
+class LeRobotEchelonArmCamDataConfig(DataConfigFactory):
+    action_sequence_keys: Sequence[str] = ("action",)
+
+    @override
+    def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
+        repack_transform = _transforms.Group(
+            inputs=[
+                _transforms.RepackTransform(
+                    {
+                        "state": "state",
+                        # Actions key is required for computing norm stats
+                        "actions": "action",
+                        "images": {
+                            "cam_low": "images.main",
+                            "cam_right_wrist": "images.arm_right",
+                        },
+                        "prompt": "prompt",
+                    }
+                )
+            ]
+        )
+
+        data_transforms = _transforms.Group(
+            inputs=[
+                echelon_policy.EchelonInputs(
+                    action_dim=model_config.action_dim,
+                )
+            ],
+            outputs=[
+                echelon_policy.EchelonOutputs(
+                    action_output_dim=7,
+                )
+            ],
+        )
+
+        model_transforms = ModelTransformFactory()(model_config)
+
+        return dataclasses.replace(
+            self.create_base_config(assets_dirs),
+            repack_transforms=repack_transform,
+            data_transforms=data_transforms,
+            model_transforms=model_transforms,
+            action_sequence_keys=self.action_sequence_keys,
+        )
+
+
+@dataclasses.dataclass(frozen=True)
 class LeRobotAlohaDataConfig(DataConfigFactory):
     # If true, will convert joint dimensions to deltas with respect to the current state before passing to the model.
     # Gripper dimensions will remain in absolute values.
@@ -471,6 +518,29 @@ _CONFIGS = [
             assets=AssetsConfig(asset_id="mattmazzola/echelon"),
         ),
     ),
+    TrainConfig(
+        name="pi0_echelon_ja",
+        # model=pi0.Pi0EchelonConfig(),
+        model=pi0.Pi0Config(),
+        data=LeRobotEchelonDataConfig(
+            assets=AssetsConfig(asset_id="mattmazzola/echelon-joint-angles"),
+        ),
+    ),
+    TrainConfig(
+        name="pi0_echelon_ja_fuzzed",
+        # model=pi0.Pi0EchelonConfig(),
+        model=pi0.Pi0Config(),
+        data=LeRobotEchelonDataConfig(
+            assets=AssetsConfig(asset_id="mattmazzola/echelon-joint-angles-fuzzed"),
+        ),
+    ),
+    TrainConfig(
+        name="pi0_echelon_ja_original_arm_cam_inf",
+        model=pi0.Pi0Config(),
+        data=LeRobotEchelonArmCamDataConfig(
+            assets=AssetsConfig(asset_id="mattmazzola/echelon-joint-angles-arm-cam"),
+        ),
+    ),
     #
     # Inference Aloha configs.
     #
@@ -543,6 +613,49 @@ _CONFIGS = [
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader("s3://openpi-assets/checkpoints/pi0_base/params"),
         num_train_steps=20_000,
+        fsdp_devices=4,
+    ),
+    TrainConfig(
+        name="pi0_echelon_sim_ja",
+        model=pi0.Pi0Config(),
+        data=LeRobotEchelonDataConfig(
+            repo_id="mattmazzola/echelon-joint-angles",
+            base_config=DataConfig(
+                local_files_only=True,
+                prompt_from_task=True,
+            ),
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("s3://openpi-assets/checkpoints/pi0_base/params"),
+        num_train_steps=20_000,
+        fsdp_devices=4,
+    ),
+    TrainConfig(
+        name="pi0_echelon_sim_ja_fuzzed",
+        model=pi0.Pi0Config(),
+        data=LeRobotEchelonDataConfig(
+            repo_id="mattmazzola/echelon-joint-angles-fuzzed",
+            base_config=DataConfig(
+                local_files_only=True,
+                prompt_from_task=True,
+            ),
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("s3://openpi-assets/checkpoints/pi0_base/params"),
+        num_train_steps=20_000,
+        fsdp_devices=4,
+    ),
+    TrainConfig(
+        name="pi0_echelon_ja_original_arm_cam_train",
+        model=pi0.Pi0Config(),
+        data=LeRobotEchelonArmCamDataConfig(
+            repo_id="mattmazzola/echelon-joint-angles-arm-cam",
+            base_config=DataConfig(
+                local_files_only=True,
+                prompt_from_task=True,
+            ),
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("s3://openpi-assets/checkpoints/pi0_base/params"),
+        num_train_steps=20_000,
+        fsdp_devices=4,
     ),
     #
     # Fine-tuning Libero configs.
