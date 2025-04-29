@@ -10,7 +10,8 @@ description: Finetune OpenVLA on Echelon
 
 # See private docs for setting compute to a resource URI:
 # https://dev.azure.com/msresearch/GCR/_wiki/wikis/GCR%20Wiki/14263/Job-Submission-using-AML-SDKv2-(and-bring-your-own-workspace)?anchor=default-vc-info
-compute: /subscriptions/22da88f6-1210-4de2-a5a3-da4c7c2a1213/resourceGroups/gcr-singularity/providers/Microsoft.MachineLearningServices/virtualclusters/msrresrchbasicvc
+# compute: /subscriptions/22da88f6-1210-4de2-a5a3-da4c7c2a1213/resourceGroups/gcr-singularity/providers/Microsoft.MachineLearningServices/virtualclusters/msrresrchbasicvc
+compute: /subscriptions/22da88f6-1210-4de2-a5a3-da4c7c2a1213/resourceGroups/gcr-singularity-resrch/providers/Microsoft.MachineLearningServices/virtualclusters/msrresrchvc
 
 distribution:
   type: pytorch
@@ -19,8 +20,8 @@ distribution:
 resources:
   instance_count: 2
   # TODO: How to determine available instance types?
-  instance_type: Singularity.NC24ad_A100_v4
-  # instance_type: Singularity.NC48ad_A100_v4
+  # instance_type: Singularity.NC24ad_A100_v4
+  instance_type: Singularity.NC48ad_A100_v4
 
 environment:
   # image: mcr.microsoft.com/azureml/openmpi4.1.0-cuda11.6-cudnn8-ubuntu20.04:latest
