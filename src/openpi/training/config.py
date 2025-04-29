@@ -644,6 +644,20 @@ _CONFIGS = [
         fsdp_devices=4,
     ),
     TrainConfig(
+        name="pi0_echelon_original_eef_main_arm_cam_train",
+        model=pi0.Pi0Config(),
+        data=LeRobotEchelonArmCamDataConfig(
+            repo_id="microsoft/echelon-original-eef-main_right_wrist",
+            base_config=DataConfig(
+                local_files_only=True,
+                prompt_from_task=True,
+            ),
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("s3://openpi-assets/checkpoints/pi0_base/params"),
+        num_train_steps=20_000,
+        fsdp_devices=4,
+    ),
+    TrainConfig(
         name="pi0_echelon_ja_original_arm_cam_train",
         model=pi0.Pi0Config(),
         data=LeRobotEchelonArmCamDataConfig(

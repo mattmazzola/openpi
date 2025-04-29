@@ -80,7 +80,7 @@
             "args": [
                 "--config-name",
                 // "pi0_echelon_sim_ja",
-                "pi0_echelon_ja_original_arm_cam_train",
+                "pi0_echelon_original_eef_main_arm_cam_train",
             ],
             "python": "${workspaceFolder}/.venv/bin/python"
         },
@@ -96,9 +96,9 @@
                 "XLA_PYTHON_CLIENT_MEM_FRACTION": "0.9"
             },
             "args": [
-                "pi0_echelon_ja_original_arm_cam_train",
+                "pi0_echelon_original_eef_main_arm_cam_train",
                 "--exp-name",
-                "echelon_ja_original_arm_cam_train",
+                "echelon_original-eef-main_arm_cam",
                 "--overwrite",
             ],
             "python": "${workspaceFolder}/.venv/bin/python"
