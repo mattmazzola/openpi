@@ -27,7 +27,7 @@ code:
 
 jobs:
   - name: finetune-openpi-on--benchamrk_01
-    sku: G4-A100
+    sku: G2-A100
     # sku: G4-A100-NvLink
     # sku: G8-H100-NvLink
 
@@ -49,6 +49,15 @@ jobs:
 
     - export HF_TOKEN=$HF_TOKEN
     - huggingface-cli login --token $HF_TOKEN
+
+    - echo "Hello world"
+
+    - nvidia-smi
+
+    - echo "Verify mounted path"
+    - ll /mnt/data
+
+    - echo "End"
 
     submit_args:
       env:

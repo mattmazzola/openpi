@@ -12,9 +12,13 @@ description: Finetune OpenVLA on Echelon
 # https://dev.azure.com/msresearch/GCR/_wiki/wikis/GCR%20Wiki/14263/Job-Submission-using-AML-SDKv2-(and-bring-your-own-workspace)?anchor=default-vc-info
 compute: /subscriptions/22da88f6-1210-4de2-a5a3-da4c7c2a1213/resourceGroups/gcr-singularity/providers/Microsoft.MachineLearningServices/virtualclusters/msrresrchbasicvc
 
+distribution:
+  type: pytorch
+  process_count_per_instance: 1
+
 resources:
-  instance_count: 1
-  # NC_A100_v4
+  instance_count: 2
+  # TODO: How to determine available instance types?
   instance_type: Singularity.NC24ad_A100_v4
   # instance_type: Singularity.NC48ad_A100_v4
 

@@ -52,6 +52,14 @@ az ml job create -f aml/finetune-openpi-echelon-aml.yaml \
 
 ## Other (Amulet)
 
+### Installation
+
+https://amulet-docs.azurewebsites.net/main/setup.html#installing-amulet
+
+```bash
+uv pip install amlt --extra-index-url https://msrpypi.azurewebsites.net/stable/leloojoo
+```
+
 ### Add storage credential
 
 ```bash
@@ -110,6 +118,10 @@ https://amulet-docs.azurewebsites.net/
 https://dev.azure.com/dlmm/_git/ProjectWillow?path=/amlt/README.md
 
 ### Useful Commands
+
+```bash
+amlt target info
+```
 
 #### Get target SKUs by type
 
