@@ -23,10 +23,12 @@
             "justMyCode": false,
             "args": [
                 "--data-dir",
-                "~/echelondata/atupini/benchamrk_01_post_quaternion_fix/",
+                "~/echelondata/mattm/datasets/20250425_main_rightarm_cameras/",
                 "--dataset-name",
-                "benchamrk_01_post_quaternion_fix__20250404_original",
-                // "--push-to-hub",
+                "echelon_original",
+                "--repo_name",
+                "microsoft/echelon-original-eef-main_right_wrist",
+                "--push-to-hub",
             ],
             "python": "${workspaceFolder}/.venv/bin/python"
         },

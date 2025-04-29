@@ -18,11 +18,28 @@ from scipy.spatial.transform import Rotation
 from typing import Any
 
 
-def get_state_action(step: dict[str, Any]) -> tuple[tf.Tensor, tf.Tensor]:
+def compute_rotation_delta(current, target):
+    assert current.shape[-1] == 4, f"Expected quaternions with 4 values, got shape {current.shape}"
+    assert target.shape[-1] == 4, f"Expected quaternions with 4 values, got shape {target.shape}"
+
+    # Create Rotation objects for current and target quaternions
+    current_r = Rotation.from_quat(current.numpy())
+    target_r = Rotation.from_quat(target.numpy())
+
+    # Compute the delta rotation: q_delta = q_target * q_current^(-1)
+    delta_r = target_r * current_r.inv()
+
+    # Convert to euler angles (roll, pitch, yaw in radians)
+    result = delta_r.as_euler("xyz")
+
+    return result
+
+
+def get_eef_state_action(step: dict[str, Any]) -> tuple[tf.Tensor, tf.Tensor]:
     observation = step["observation"]
     action = step["action"]
 
-    # Robot state - EEF XYZ (3) + Quaternion (4) + Gripper Open/Close (1)
+    # Robot state (8) - EEF XYZ (3) + Quaternion (4) + Gripper Open/Close (1)
     state_eef_position = observation["tip_cartesian_euler_position_r"]
     state_eef_activation = observation["end_effector_action_r"]
     state_eef_activation = tf.clip_by_value(state_eef_activation, 0.0, 1.0)
@@ -40,7 +57,7 @@ def get_state_action(step: dict[str, Any]) -> tuple[tf.Tensor, tf.Tensor]:
     state_eef_xyz = state_eef_position[:3]
     state_eef_orientation = state_eef_position[3:7]
 
-    # Robot action - EEF XYZ (3) + Quaternion (4) + Gripper Open/Close (1)
+    # Robot action (7) - EEF XYZ (3) + EEF RPY (3) + Gripper Open/Close (1)
     action_eef_position = action["tip_cartesian_euler_position_r"]
     action_eef_xyz = action_eef_position[:3]
     action_eef_orientation = action_eef_position[3:7]
@@ -69,21 +86,41 @@ def get_state_action(step: dict[str, Any]) -> tuple[tf.Tensor, tf.Tensor]:
     return robot_state, robot_action
 
 
-def compute_rotation_delta(current, target):
-    assert current.shape[-1] == 4, f"Expected quaternions with 4 values, got shape {current.shape}"
-    assert target.shape[-1] == 4, f"Expected quaternions with 4 values, got shape {target.shape}"
+def get_joint_angles_state_action(step: dict[str, Any]) -> tuple[tf.Tensor, tf.Tensor]:
+    observation = step["observation"]
+    action = step["action"]
+    ur3e_joints_max_index = 6
 
-    # Create Rotation objects for current and target quaternions
-    current_r = Rotation.from_quat(current.numpy())
-    target_r = Rotation.from_quat(target.numpy())
+    # Robot state (7) - Joint angles (6) + Gripper Action (1)
+    # Joint angles are in radians, gripper action is a float between 0 and 1
+    state_joint_angles = observation["joint_position_r"][:ur3e_joints_max_index]
+    state_eef_action = observation["end_effector_action_r"]
+    state_eef_action = tf.clip_by_value(state_eef_action, 0.0, 1.0)
 
-    # Compute the delta rotation: q_delta = q_target * q_current^(-1)
-    delta_r = target_r * current_r.inv()
+    robot_state = tf.concat(
+        [
+            state_joint_angles,
+            state_eef_action,
+        ],
+        axis=-1,
+    )
 
-    # Convert to euler angles (roll, pitch, yaw in radians)
-    result = delta_r.as_euler("xyz")
+    assert robot_state is not None
 
-    return result
+    # Robot action (7) - Joint angles (6) + Gripper Action (1)
+    action_joint_angles = action["joint_position_r"][:ur3e_joints_max_index]
+    action_eef_action = action["end_effector_action_r"]
+    action_eef_action = tf.clip_by_value(action_eef_action, 0.0, 1.0)
+
+    robot_action = tf.concat(
+        [
+            action_joint_angles,
+            action_eef_action,
+        ],
+        axis=-1,
+    )
+
+    return robot_state, robot_action
 
 
 def main(
@@ -91,7 +128,23 @@ def main(
     dataset_name: str,
     *,
     push_to_hub: bool = False,
-    repo_name: str = "mattmazzola/echelon",
+    # Dataset Naming Conventions:
+    # echelon-[data_class]-[state_type]-[cameras]
+    # data_class: original, orig_and_fuzzed
+    # state: eef, ja
+    # cameras: main, main_and_right_wrist
+    #
+    # ERDS dataset (Does not need state because includes all data)
+    # echelon_original-main
+    # echelon_fuzzed-main_right_wrist
+    #
+    # Pi/Lerobot Dataset, Model
+    # echelon-original-eef-main
+    # echelon-original-eef-main_and_right_wrist
+    # echelon-original-ja-main
+    # echelon-original-ja-main_and_right_wrist
+    # TODO: Compute repo name from args given
+    repo_name: str = "mattmazzola/echelon-original-eef-main_and_right_wrist",
 ):
     # Clean up any existing dataset in the output directory
     output_path = LEROBOT_HOME / repo_name
@@ -106,7 +159,12 @@ def main(
         robot_type="ur3e",
         fps=5,
         features={
-            "image": {
+            "images.main": {
+                "dtype": "image",
+                "shape": (512, 910, 3),
+                "names": ["height", "width", "channel"],
+            },
+            "images.arm_right": {
                 "dtype": "image",
                 "shape": (512, 910, 3),
                 "names": ["height", "width", "channel"],
@@ -129,10 +187,12 @@ def main(
     erlds_dataset = tfds.load(dataset_name, data_dir=data_dir, split="train")
     for episode in erlds_dataset:
         for step in episode["steps"].as_numpy_iterator():
-            image = step["observation"]["image_main"]
-            state, action = get_state_action(step)
+            image_main = step["observation"]["image_main"]
+            image_arm_right = step["observation"]["image_r"]
+            state, action = get_eef_state_action(step)
             frame = {
-                "image": image,
+                "images.main": image_main,
+                "images.arm_right": image_arm_right,
                 "state": state,
                 "action": action,
             }
