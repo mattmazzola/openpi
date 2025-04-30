@@ -107,7 +107,9 @@ $AML_WORKSPACE_NAME
 ### Submit Job
 
 ```bash
-amlt run aml/finetune-openpi-echelon-amulet-command.yaml echelon-openpi-finetune --yes -d ""
+DATETIMESTR=$(date +%Y%m%d_%H%M%S)
+JOB_NAME="echelon-openpi-finetune-$DATETIMESTR"
+amlt run aml/finetune-openpi-echelon-amulet-command.yaml :finetune=$JOB_NAME echelon-openpi-finetune --yes -d ""
 ```
 
 ## Other Notes
@@ -128,4 +130,3 @@ amlt target info
 ```bash
 amlt cache instance-types -I A100
 amlt cache instance-types -I MI300
-```
