@@ -28,17 +28,21 @@ resources:
       slaTier: Premium
       enableAzmlInt: false
       priority: high
+      Priority: High
 
     amlt:
       job:
-        sku: G2-A100
+        # sku: G2-A100
+        sku: G4-A100
 
     # Possible alternative to setting objects
     # amlt.job.sku: G2-A100
     # azureml.SLATier: Premium
 
+setting:
+  priority: high
+
 environment:
-  # image: mcr.microsoft.com/azureml/openmpi4.1.0-cuda11.6-cudnn8-ubuntu20.04:latest
   image: mcr.microsoft.com/azureml/inference-base-cuda12.4-ubuntu22.04
 
 code: ../
