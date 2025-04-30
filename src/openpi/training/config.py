@@ -538,7 +538,7 @@ _CONFIGS = [
         name="pi0_echelon_ja_original_arm_cam_inf",
         model=pi0.Pi0Config(),
         data=LeRobotEchelonArmCamDataConfig(
-            assets=AssetsConfig(asset_id="mattmazzola/echelon-joint-angles-arm-cam"),
+            assets=AssetsConfig(asset_id="microsoft/echelon-original-ja-main_and_right_wrist"),
         ),
     ),
     #
@@ -658,10 +658,10 @@ _CONFIGS = [
         fsdp_devices=4,
     ),
     TrainConfig(
-        name="pi0_echelon_ja_original_arm_cam_train",
+        name="pi0_echelon_original_ja_main_arm_cam_train",
         model=pi0.Pi0Config(),
         data=LeRobotEchelonArmCamDataConfig(
-            repo_id="mattmazzola/echelon-joint-angles-arm-cam",
+            repo_id="microsoft/echelon-original-ja-main_and_right_wrist",
             base_config=DataConfig(
                 local_files_only=True,
                 prompt_from_task=True,

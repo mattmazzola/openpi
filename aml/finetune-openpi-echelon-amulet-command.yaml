@@ -94,9 +94,9 @@ jobs:
     - tree -d -L 2 /mnt/data
 
     - echo ""
-    - echo "Install tensorflow_datasets"
+    - echo "Install tensorflow_datasets for TFDS conversion to HFDS"
     - echo "========================="
-    - uv pip tensorflow_datasets
+    - uv pip install tensorflow tensorflow_datasets
 
     - echo ""
     - echo "Convert ERLDS dataset to Lerobot format"
@@ -110,6 +110,24 @@ jobs:
         --org_or_user microsoft
         --prefix echelon
 
+    - echo ""
+    - echo "Compute Norm Stats"
+    - echo "========================="
+    - export CUDA_VISIBLE_DEVICES=0
+    - uv run ./scripts/compute_norm_stats.py
+        --config-name pi0_echelon_original_ja_main_arm_cam_train
+    - unset CUDA_VISIBLE_DEVICES
+
+    - echo ""
+    - echo "Train"
+    - echo "========================="
+    - export XLA_PYTHON_CLIENT_MEM_FRACTION=0.9
+    - uv run ./scripts/train.py
+        pi0_echelon_original_ja_main_arm_cam_train
+        --exp-name
+        "echelon_original-ja-main_and_right_wrist"
+        --overwrite
+      
     - echo "End"
 
     submit_args:
