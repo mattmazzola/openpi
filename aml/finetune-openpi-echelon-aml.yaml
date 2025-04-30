@@ -18,16 +18,29 @@ distribution:
   process_count_per_instance: 1
 
 resources:
-  instance_count: 2
+  instance_count: 1
   # TODO: How to determine available instance types?
   # instance_type: Singularity.NC24ad_A100_v4
   instance_type: Singularity.NC48ad_A100_v4
+  properties:
+
+    AISuperComputer:
+      slaTier: Premium
+
+    amlt:
+      job:
+        sku: G2-A100
+
+    priority: high
+
+    # amlt.job.sku: G2-A100
+    # azureml.SLATier: Premium
 
 environment:
   # image: mcr.microsoft.com/azureml/openmpi4.1.0-cuda11.6-cudnn8-ubuntu20.04:latest
   image: mcr.microsoft.com/azureml/inference-base-cuda12.4-ubuntu22.04
 
-code: ../src
+code: ../
 
 environment_variables:
   XLA_PYTHON_CLIENT_MEM_FRACTION: "0.9"
@@ -53,19 +66,98 @@ properties:
   AZURE_ML_INPUT_PathOnCompute_benchmark_data: /mnt/data/benchmark_data
 
 command: |-
-  echo "Hello world"
+  echo "Job Start"
+  echo "========================="
 
+  echo ""
+  echo "Install dependencies"
+  echo "========================="
+  sudo apt-get -y install git git-lfs tree
+
+  echo ""
+  echo "Container Setup" 
+  echo "========================="
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+  source /home/aiscuser/.local/bin/env
+  # source $HOME/.local/bin/env
+  uv
+
+  echo ""
+  echo "uv sync"
+  echo "========================="
+  GIT_LFS_SKIP_SMUDGE=1 uv sync
+
+  echo ""
+  echo "activate virtual env"
+  echo "========================="
+  source .venv/bin/activate
+
+  echo ""
+  echo "uv pip install -e ."
+  echo "========================="
+  GIT_LFS_SKIP_SMUDGE=1 uv pip install -e .
+
+  echo ""
+  echo "Install to WANDB nd HF"
+  echo "========================="
+  pip install wandb
+  pip install -U "huggingface_hub[cli]"
+
+  echo ""
+  echo "Authenticate to WANDB nd HF"
+  echo "========================="
+  export WANDB_PROJECT=$WANDB_PROJECT
+  export WANDB_API_KEY=$WANDB_API_KEY
+  wandb login --host=$WANDB_BASE_URL
+
+  export HF_TOKEN=$HF_TOKEN
+  huggingface-cli login --token $HF_TOKEN
+
+  echo ""
+  echo "Verify CUDA and Drivers"
+  echo "========================="
   nvidia-smi
 
-  echo "Verify input path"
-  echo ${{inputs.benchmark_data}}
+  echo ""
+  echo "Verify ERLDS dataset path"
+  echo "========================="
+  tree -d -L 2 /mnt/data
 
-  echo "Verify input data"
-  ll ${{inputs.benchmark_data}}
+  echo ""
+  echo "Install tensorflow_datasets for TFDS conversion to HFDS"
+  echo "========================="
+  uv pip install tensorflow_datasets
 
-  echo "Verify mounted path"
-  ll /mnt/data/benchmark_data
+  echo ""
+  echo "Convert ERLDS dataset to Lerobot format"
+  echo "========================="
+  uv run ./scripts/convert_erlds_data_to_lerobot.py
+      --data-dir /mnt/data/mattm/datasets/20250425_main_rightarm_cameras
+      --dataset-name echelon_original
+      --data_class original
+      --state_type ja
+      --cameras main_and_right_wrist
+      --org_or_user microsoft
+      --prefix echelon
 
+  echo ""
+  echo "Compute Norm Stats"
+  echo "========================="
+  export CUDA_VISIBLE_DEVICES=0
+  uv run ./scripts/compute_norm_stats.py
+      --config-name pi0_echelon_original_ja_main_arm_cam_train
+  unset CUDA_VISIBLE_DEVICES
+
+  echo ""
+  echo "Train"
+  echo "========================="
+  export XLA_PYTHON_CLIENT_MEM_FRACTION=0.9
+  uv run ./scripts/train.py
+      pi0_echelon_original_ja_main_arm_cam_train
+      --exp-name
+      "echelon_original-ja-main_and_right_wrist"
+      --overwrite
+    
   echo "End"
 
 
