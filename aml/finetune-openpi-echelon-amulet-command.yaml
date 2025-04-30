@@ -25,7 +25,8 @@ code:
 
 jobs:
   - name: finetune
-    sku: G2-A100
+    sku: G4-A100
+    # sku: G2-A100
     # Maps to InstanceCount: 1, GPUS: 2, and InstanceType: Singularity.NC48ad_A100_v4
     # sku: G4-A100-NvLink
     # sku: G8-H100-NvLink
@@ -43,6 +44,12 @@ jobs:
     - echo "Install dependencies"
     - echo "========================="
     - sudo apt-get -y install git git-lfs tree
+
+    # Attempt to prevent TPU errors
+    # ImportError: libgthread-2.0.so.0: cannot open shared object file
+    # Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so
+    # libtpu.so: cannot open shared object file: No such file or directory
+    - sudo apt-get -y install libglib2.0-0
   
     - echo ""
     - echo "Container Setup" 
