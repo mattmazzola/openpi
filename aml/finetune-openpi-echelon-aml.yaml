@@ -19,20 +19,21 @@ distribution:
 
 resources:
   instance_count: 1
-  # TODO: How to determine available instance types?
+  # Determine available instance types by running `amlt cache instance-types -I A100``
   # instance_type: Singularity.NC24ad_A100_v4
   instance_type: Singularity.NC48ad_A100_v4
   properties:
 
     AISuperComputer:
       slaTier: Premium
+      enableAzmlInt: false
+      priority: high
 
     amlt:
       job:
         sku: G2-A100
 
-    priority: high
-
+    # Possible alternative to setting objects
     # amlt.job.sku: G2-A100
     # azureml.SLATier: Premium
 
