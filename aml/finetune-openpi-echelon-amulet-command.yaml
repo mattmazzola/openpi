@@ -9,9 +9,7 @@ target:
 environment:
   image: amlt-sing/acpt-torch2.3.1-py3.10-cuda12.1-ubuntu22.04
 
-  setup:
-    - echo "start" 
-    - pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
+  # setup:
 
 storage:
   data:
@@ -26,43 +24,85 @@ code:
   local_dir: $CONFIG_DIR/..
 
 jobs:
-  - name: finetune-openpi-on--benchamrk_02
+  - name: finetune
     sku: G2-A100
+    # Maps to InstanceCount: 1, GPUS: 2, and InstanceType: Singularity.NC48ad_A100_v4
     # sku: G4-A100-NvLink
     # sku: G8-H100-NvLink
 
     priority: high
     mpi: False
+    # sla_tier: Standard
     sla_tier: Premium
     process_count_per_node: 1
     identity: managed
     command:
-    - sudo apt-get -y install git git-lfs tree
+    - echo "Job Start"
 
+    - echo ""
+    - echo "Install dependencies"
+    - echo "========================="
+    - sudo apt-get -y install git git-lfs tree
+  
+    - echo ""
+    - echo "Container Setup" 
+    - echo "========================="
+    - curl -LsSf https://astral.sh/uv/install.sh | sh
+    - source /home/aiscuser/.local/bin/env
+    # - source $HOME/.local/bin/env
+    - uv
+
+    - echo ""
+    - echo "uv sync"
+    - echo "========================="
+    - GIT_LFS_SKIP_SMUDGE=1 uv sync
+  
+    - echo ""
+    - echo "activate"
+    - echo "========================="
+    - source .venv/bin/activate
+
+    - echo ""
+    - echo "uv pip install -e ."
+    - echo "========================="
+    - GIT_LFS_SKIP_SMUDGE=1 uv pip install -e .
+  
+    - echo ""
+    - echo "Install to WANDB nd HF"
+    - echo "========================="
     - pip install wandb
     - pip install -U "huggingface_hub[cli]"
-
+  
+    - echo ""
+    - echo "Authenticate to WANDB nd HF"
+    - echo "========================="
     - export WANDB_PROJECT=$WANDB_PROJECT
     - export WANDB_API_KEY=$WANDB_API_KEY
     - wandb login --host=$WANDB_BASE_URL
 
-    - DATASET_NAME=benchamrk_01_post_quaternion_fix__20250404_original
-
     - export HF_TOKEN=$HF_TOKEN
     - huggingface-cli login --token $HF_TOKEN
 
-    - echo "Hello world"
-
+    - echo ""
+    - echo "Verify CUDA and Drivers"
+    - echo "========================="
     - nvidia-smi
 
-    - echo "Verify mounted path"
-    - ls -l /mnt/data
-
+    - echo ""
     - echo "Verify ERLDS dataset path"
-    - tree -d -L 3 /mnt/data
+    - echo "========================="
+    - tree -d -L 2 /mnt/data
 
-    - python -m scripts.convert_erlds_data_to_lerobot
-        --data-dir ~/echelondata/mattm/datasets/20250425_main_rightarm_cameras/
+    - echo ""
+    - echo "Install tensorflow_datasets"
+    - echo "========================="
+    - uv pip tensorflow_datasets
+
+    - echo ""
+    - echo "Convert ERLDS dataset to Lerobot format"
+    - echo "========================="
+    - uv run ./scripts/convert_erlds_data_to_lerobot.py
+        --data-dir /mnt/data/mattm/datasets/20250425_main_rightarm_cameras
         --dataset-name echelon_original
         --data_class original
         --state_type ja
