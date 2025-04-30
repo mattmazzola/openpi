@@ -11,11 +11,12 @@ import shutil
 from lerobot.common.datasets.lerobot_dataset import LEROBOT_HOME
 from lerobot.common.datasets.lerobot_dataset import LeRobotDataset
 import tensorflow_datasets as tfds
+from torch import Tensor
 import tyro
 import numpy as np
 import tensorflow as tf
 from scipy.spatial.transform import Rotation
-from typing import Any
+from typing import Any, Callable
 
 
 def compute_rotation_delta(current, target):
@@ -123,33 +124,95 @@ def get_joint_angles_state_action(step: dict[str, Any]) -> tuple[tf.Tensor, tf.T
     return robot_state, robot_action
 
 
+def get_dataset_name(
+    data_class: str,
+    state_type: str,
+    cameras: str,
+    prefix: str = "echelon",
+) -> str:
+    """
+    Generate dataset name according to naming conventions.
+
+    Dataset Naming Conventions:
+    echelon-[data_class]-[state_type]-[cameras]
+
+    Examples:
+    ---------
+    ERDS dataset (Does not need state because includes all data):
+    - echelon_original-main
+    - echelon_fuzzed-main_right_wrist
+
+    Pi/Lerobot Dataset, Model:
+    - echelon-original-eef-main
+    - echelon-original-eef-main_and_right_wrist
+    - echelon-original-ja-main
+    - echelon-original-ja-main_and_right_wrist
+    """
+
+    return f"{prefix}-{data_class}-{state_type}-{cameras}"
+
+
 def main(
     data_dir: str,
     dataset_name: str,
     *,
     push_to_hub: bool = False,
-    # Dataset Naming Conventions:
-    # echelon-[data_class]-[state_type]-[cameras]
-    # data_class: original, orig_and_fuzzed
-    # state: eef, ja
-    # cameras: main, main_and_right_wrist
-    #
-    # ERDS dataset (Does not need state because includes all data)
-    # echelon_original-main
-    # echelon_fuzzed-main_right_wrist
-    #
-    # Pi/Lerobot Dataset, Model
-    # echelon-original-eef-main
-    # echelon-original-eef-main_and_right_wrist
-    # echelon-original-ja-main
-    # echelon-original-ja-main_and_right_wrist
-    # TODO: Compute repo name from args given
-    repo_name: str = "mattmazzola/echelon-original-eef-main_and_right_wrist",
+    # TODO: Change str to Enums to limit options
+    data_class: str = "original",
+    state_type: str = "ja",
+    cameras: str = "main_and_right_wrist",
+    org_or_user: str = "microsoft",
+    prefix: str = "echelon",
 ):
+    output_dataset_name = get_dataset_name(
+        data_class=data_class,
+        state_type=state_type,
+        cameras=cameras,
+        prefix=prefix,
+    )
+    repo_name = f"{org_or_user}/{output_dataset_name}"
+    print(f"HF repo name: {repo_name}")
+
     # Clean up any existing dataset in the output directory
     output_path = LEROBOT_HOME / repo_name
     if output_path.exists():
         shutil.rmtree(output_path)
+
+    state_dim = 8 if state_type == "eef" else 7
+    action_dim = 7
+
+    features = {
+        "state": {
+            "dtype": "float32",
+            "shape": (state_dim,),
+            "names": ["state"],
+        },
+        "action": {
+            "dtype": "float32",
+            "shape": (action_dim,),
+            "names": ["action"],
+        },
+        "images.main": {
+            "dtype": "image",
+            "shape": (512, 910, 3),
+            "names": ["height", "width", "channel"],
+        },
+    }
+
+    if cameras == "main_and_right_wrist":
+        features.update(
+            {
+                "images.arm_right": {
+                    "dtype": "image",
+                    "shape": (512, 910, 3),
+                    "names": ["height", "width", "channel"],
+                },
+            }
+        )
+
+    print(f"State dimension: {state_dim}")
+    print(f"Action dimension: {action_dim}")
+    print(f"Features: {[k for k in features.keys()]}")
 
     # Create LeRobot dataset, define features to store
     # OpenPi assumes that proprio is stored in `state` and actions in `action`
@@ -158,28 +221,7 @@ def main(
         repo_id=repo_name,
         robot_type="ur3e",
         fps=5,
-        features={
-            "images.main": {
-                "dtype": "image",
-                "shape": (512, 910, 3),
-                "names": ["height", "width", "channel"],
-            },
-            "images.arm_right": {
-                "dtype": "image",
-                "shape": (512, 910, 3),
-                "names": ["height", "width", "channel"],
-            },
-            "state": {
-                "dtype": "float32",
-                "shape": (8,),
-                "names": ["state"],
-            },
-            "action": {
-                "dtype": "float32",
-                "shape": (7,),
-                "names": ["action"],
-            },
-        },
+        features=features,
         image_writer_threads=10,
         image_writer_processes=5,
     )
@@ -189,13 +231,26 @@ def main(
         for step in episode["steps"].as_numpy_iterator():
             image_main = step["observation"]["image_main"]
             image_arm_right = step["observation"]["image_r"]
-            state, action = get_eef_state_action(step)
+
+            get_state_action_fn: Callable[[dict[str, Any]], tuple[Tensor, Tensor]] = None
+            match state_type:
+                case "eef":
+                    get_state_action_fn = get_eef_state_action
+                case "ja":
+                    get_state_action_fn = get_joint_angles_state_action
+                case _:
+                    raise ValueError(f"Invalid state type: {state_type}")
+
+            state, action = get_state_action_fn(step)
             frame = {
-                "images.main": image_main,
-                "images.arm_right": image_arm_right,
                 "state": state,
                 "action": action,
+                "images.main": image_main,
             }
+
+            if cameras == "main_and_right_wrist":
+                frame["images.arm_right"] = image_arm_right
+
             task = step["natural_language_instruction"].decode()
 
             lerobot_dataset.add_frame(frame)

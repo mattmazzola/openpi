@@ -16,7 +16,7 @@
             ]
         },
         {
-            "name": "Convert ERLDS EEF to LeRobot",
+            "name": "Convert ERLDS to LeRobot",
             "type": "debugpy",
             "request": "launch",
             "module": "scripts.convert_erlds_data_to_lerobot",
@@ -26,8 +26,16 @@
                 "~/echelondata/mattm/datasets/20250425_main_rightarm_cameras/",
                 "--dataset-name",
                 "echelon_original",
-                "--repo_name",
-                "microsoft/echelon-original-eef-main_right_wrist",
+                "--data_class",
+                "original",
+                "--state_type",
+                "ja",
+                "--cameras",
+                "main_and_right_wrist",
+                "--org_or_user",
+                "microsoft",
+                "--prefix",
+                "echelon",
                 "--push-to-hub",
             ],
             "python": "${workspaceFolder}/.venv/bin/python"
