@@ -2,8 +2,8 @@ description: Finetune OpenVLA on Echelon
 
 target:
   service: sing
-  # name: msrresrchvc
-  name: msrresrchbasicvc
+  name: msrresrchvc
+  # name: msrresrchbasicvc
   workspace_name: reubenws
 
 environment:
@@ -26,24 +26,25 @@ code:
   local_dir: $CONFIG_DIR/..
 
 jobs:
-  - name: finetune-openpi-on--benchamrk_01
+  - name: finetune-openpi-on--benchamrk_02
     sku: G2-A100
     # sku: G4-A100-NvLink
     # sku: G8-H100-NvLink
 
     priority: high
     mpi: False
-    sla_tier: Standard
+    sla_tier: Premium
     process_count_per_node: 1
     identity: managed
     command:
-    - sudo apt-get -y install git git-lfs
+    - sudo apt-get -y install git git-lfs tree
+
+    - pip install wandb
+    - pip install -U "huggingface_hub[cli]"
 
     - export WANDB_PROJECT=$WANDB_PROJECT
     - export WANDB_API_KEY=$WANDB_API_KEY
     - wandb login --host=$WANDB_BASE_URL
-
-    - ls -l /mnt/data
 
     - DATASET_NAME=benchamrk_01_post_quaternion_fix__20250404_original
 
@@ -55,7 +56,19 @@ jobs:
     - nvidia-smi
 
     - echo "Verify mounted path"
-    - ll /mnt/data
+    - ls -l /mnt/data
+
+    - echo "Verify ERLDS dataset path"
+    - tree -d -L 3 /mnt/data
+
+    - python -m scripts.convert_erlds_data_to_lerobot
+        --data-dir ~/echelondata/mattm/datasets/20250425_main_rightarm_cameras/
+        --dataset-name echelon_original
+        --data_class original
+        --state_type ja
+        --cameras main_and_right_wrist
+        --org_or_user microsoft
+        --prefix echelon
 
     - echo "End"
 
