@@ -24,11 +24,10 @@ resources:
   instance_type: Singularity.NC48ad_A100_v4
   properties:
 
-    AISuperComputer:
+    singularity:
       slaTier: Premium
+      priority: High
       enableAzmlInt: false
-      priority: high
-      Priority: High
 
     amlt:
       job:
@@ -38,9 +37,6 @@ resources:
     # Possible alternative to setting objects
     # amlt.job.sku: G2-A100
     # azureml.SLATier: Premium
-
-setting:
-  priority: high
 
 environment:
   image: mcr.microsoft.com/azureml/inference-base-cuda12.4-ubuntu22.04
