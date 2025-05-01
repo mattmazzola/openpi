@@ -130,3 +130,4 @@ amlt target info
 ```bash
 amlt cache instance-types -I A100
 amlt cache instance-types -I MI300
+```
